@@ -28,7 +28,7 @@ Each program offers built-in sample data as well as custom keyboard input.
 ## Run all tests
 
 ```powershell
-python -m unittest discover -v
+python -m unittest -v problem1_dijkstra.test_dijkstra problem2_knapsack_dp.test_knapsack problem3_tsp_genetic.test_genetic
 ```
 
 ## Before submission
@@ -40,5 +40,4 @@ python -m unittest discover -v
 - Include expected-versus-actual results in the report.
 - Declare that AI assisted with the initial project structure and code boilerplate.
 - Verify the source code manually and modify it as your group considers appropriate.
-
 
