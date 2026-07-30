@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CSC2103 Algorithm Guide</title>
+    <style>
+      :root {
+        --ink: #17243d;
+        --muted: #526178;
+        --paper: #f3f6f7;
+        --white: #ffffff;
+        --line: #ccd6dc;
+        --coral: #df624f;
+        --coral-soft: #f9dfda;
+        --teal: #168b80;
+        --teal-soft: #d9efeb;
+        --yellow: #f3ca52;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.6;
+      }
+
+      header {
+        color: white;
+        background: var(--ink);
+      }
+
+      .hero {
+        max-width: 1050px;
+        margin: auto;
+        padding: 64px 24px;
+      }
+
+      .label {
+        margin: 0 0 10px;
+        color: var(--yellow);
+        font-size: 12px;
+        font-weight: bold;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 750px;
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(42px, 7vw, 76px);
+        font-weight: normal;
+        line-height: 1;
+      }
+
+      .hero > p:last-of-type {
+        max-width: 680px;
+        margin: 24px 0;
+        color: #c6d1dc;
+        font-size: 18px;
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      nav a {
+        padding: 10px 14px;
+        color: var(--ink);
+        background: white;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+      }
+
+      main {
+        max-width: 1050px;
+        margin: auto;
+        padding: 24px;
+      }
+
+      section {
+        margin: 26px 0;
+        padding: clamp(24px, 5vw, 48px);
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+
+      h2,
+      h3 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: normal;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: clamp(30px, 4vw, 44px);
+        line-height: 1.1;
+      }
+
+      h3 {
+        margin-top: 28px;
+        font-size: 24px;
+      }
+
+      .summary {
+        max-width: 780px;
+        color: var(--muted);
+      }
+
+      .two-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .box {
+        padding: 20px;
+        background: var(--paper);
+        border-left: 5px solid var(--coral);
+      }
+
+      .teal-box {
+        border-left-color: var(--teal);
+      }
+
+      .box strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid var(--line);
+        text-align: center;
+      }
+
+      th {
+        background: #e6ecef;
+      }
+
+      .items td:first-child,
+      .items th:first-child {
+        text-align: left;
+      }
+
+      .dp-table {
+        min-width: 620px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+      }
+
+      .table-scroll {
+        overflow-x: auto;
+      }
+
+      .highlight {
+        color: white;
+        background: var(--coral);
+        font-weight: bold;
+      }
+
+      .knapsack-visualizer {
+        margin: 22px 0 30px;
+        padding: 20px;
+        background: #f8fafb;
+        border: 2px solid var(--line);
+        border-radius: 10px;
+      }
+
+      .visualizer-top {
+        display: grid;
+        grid-template-columns: 0.75fr 1.25fr;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      .bag-view,
+      .decision-view {
+        padding: 18px;
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .bag-view h4,
+      .decision-view h4 {
+        margin: 0 0 12px;
+        font-size: 16px;
+      }
+
+      .bag-track {
+        height: 42px;
+        overflow: hidden;
+        background: #e6ecef;
+        border: 2px solid var(--ink);
+        border-radius: 5px;
+      }
+
+      .bag-fill {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        width: 0;
+        padding: 0 8px;
+        color: white;
+        background: var(--coral);
+        font-weight: bold;
+        white-space: nowrap;
+        transition: width 220ms ease;
+      }
+
+      .bag-caption {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .step-label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--coral);
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .decision-view h4 {
+        margin-bottom: 10px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 21px;
+        font-weight: normal;
+      }
+
+      .decision-text {
+        min-height: 48px;
+        margin: 0 0 14px;
+        color: var(--muted);
+      }
+
+      .choice-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 8px;
+      }
+
+      .choice {
+        padding: 10px;
+        background: var(--paper);
+        border-radius: 5px;
+      }
+
+      .choice span,
+      .choice strong {
+        display: block;
+      }
+
+      .choice span {
+        color: var(--muted);
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+
+      .choice strong {
+        margin-top: 3px;
+        font-family: "Courier New", monospace;
+      }
+
+      .choice.keep {
+        min-width: 88px;
+        color: white;
+        background: var(--ink);
+      }
+
+      .sim-cell-hidden {
+        color: #b5c0c8;
+        background: #f5f7f8;
+      }
+
+      .sim-cell-current {
+        color: white;
+        background: var(--coral);
+        box-shadow: inset 0 0 0 3px #9f3528;
+        font-weight: bold;
+      }
+
+      .sim-cell-path {
+        background: var(--yellow);
+        box-shadow: inset 0 0 0 3px #b88c12;
+        font-weight: bold;
+      }
+
+      .sim-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .sim-controls button {
+        padding: 10px 14px;
+        color: var(--ink);
+        background: white;
+        border: 1px solid var(--ink);
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .sim-controls .next-button {
+        color: white;
+        background: var(--coral);
+        border-color: var(--coral);
+      }
+
+      .sim-controls button:disabled {
+        cursor: not-allowed;
+        opacity: 0.4;
+      }
+
+      .formula {
+        padding: 18px;
+        overflow-x: auto;
+        color: white;
+        background: var(--ink);
+        border-radius: 6px;
+        font-family: "Courier New", monospace;
+        white-space: nowrap;
+      }
+
+      .steps {
+        display: grid;
+        gap: 12px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .steps li {
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 12px;
+        align-items: start;
+      }
+
+      .steps span {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        color: white;
+        background: var(--coral);
+        border-radius: 50%;
+        font-weight: bold;
+      }
+
+      .ga-steps span {
+        background: var(--teal);
+      }
+
+      .steps p {
+        margin: 5px 0 0;
+      }
+
+      .route-area {
+        display: grid;
+        grid-template-columns: minmax(280px, 420px) 1fr;
+        gap: 30px;
+        align-items: center;
+        margin-top: 26px;
+      }
+
+      svg {
+        width: 100%;
+        height: auto;
+        background: var(--ink);
+        border-radius: 10px;
+      }
+
+      .route-line {
+        stroke: #75d5ca;
+        stroke-width: 4;
+      }
+
+      .city {
+        fill: white;
+        stroke: var(--teal);
+        stroke-width: 5;
+      }
+
+      .city-label {
+        fill: var(--ink);
+        font-size: 16px;
+        font-weight: bold;
+        text-anchor: middle;
+        dominant-baseline: middle;
+      }
+
+      .operator-flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin: 24px 0;
+      }
+
+      .operator-flow strong {
+        padding: 10px 13px;
+        background: var(--teal-soft);
+        border: 1px solid #a8d8d1;
+        border-radius: 6px;
+      }
+
+      .operator-flow span {
+        color: var(--teal);
+        font-weight: bold;
+      }
+
+      .result {
+        margin-top: 20px;
+        padding: 18px;
+        background: var(--coral-soft);
+        border-radius: 6px;
+      }
+
+      .tsp-result {
+        background: var(--teal-soft);
+      }
+
+      code {
+        font-family: "Courier New", monospace;
+      }
+
+      pre {
+        padding: 16px;
+        overflow-x: auto;
+        color: #e8eef2;
+        background: #101a2d;
+        border-radius: 6px;
+        line-height: 1.5;
+      }
+
+      .test-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      .test-list article {
+        padding: 18px;
+        background: var(--paper);
+        border-radius: 6px;
+      }
+
+      .test-list h3 {
+        margin: 0 0 8px;
+        font-size: 20px;
+      }
+
+      .say-it {
+        color: var(--ink);
+        background: var(--yellow);
+        border: 0;
+      }
+
+      blockquote {
+        margin: 16px 0;
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.55);
+        border-left: 5px solid var(--ink);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 18px;
+      }
+
+      footer {
+        padding: 28px 24px 50px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      @media (max-width: 760px) {
+        .two-column,
+        .route-area,
+        .test-list,
+        .visualizer-top {
+          grid-template-columns: 1fr;
+        }
+
+        .choice-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .choice.keep {
+          grid-column: 1 / -1;
+        }
+
+        section {
+          padding: 24px 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="hero">
+        <p class="label">CSC2103 · Problems 2 and 3</p>
+        <h1>Simple visual guide to Knapsack and TSP</h1>
+        <p>
+          Learn what each algorithm is trying to do, follow its main steps, then
+          run and test the real Python programs.
+        </p>
+        <nav>
+          <a href="#knapsack">0/1 Knapsack</a>
+          <a href="#tsp">TSP Genetic Algorithm</a>
+          <a href="#run">Run and test</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section id="knapsack">
+        <p class="label" style="color: var(--coral)">Problem 2</p>
+        <h2>0/1 Knapsack using Dynamic Programming</h2>
+        <p class="summary">
+          Choose items with the highest possible total value without exceeding
+          the weight capacity. “0/1” means each item is either selected once or
+          not selected.
+        </p>
+
+        <table class="items">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Weight</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Item A</td><td>3</td><td>10</td></tr>
+            <tr><td>Item B</td><td>4</td><td>12</td></tr>
+            <tr><td>Item C</td><td>2</td><td>7</td></tr>
+            <tr><td>Item D</td><td>5</td><td>14</td></tr>
+          </tbody>
+        </table>
+
+        <div class="two-column">
+          <div class="box">
+            <strong>What does one DP cell mean?</strong>
+            <code>DP[i][w]</code> is the best value possible using the first
+            <code>i</code> items with capacity <code>w</code>.
+          </div>
+          <div class="box">
+            <strong>What choice does it make?</strong>
+            Compare the value from excluding the current item against including
+            it, when it fits.
+          </div>
+        </div>
+
+        <h3>The rule used for every cell</h3>
+        <div class="formula">
+          DP[i][w] = max(exclude item, include item + earlier best value)
+        </div>
+
+        <h3>Try it: build the DP table step by step</h3>
+        <div class="knapsack-visualizer">
+          <div class="visualizer-top">
+            <div class="bag-view">
+              <h4>Current best bag</h4>
+              <div class="bag-track" aria-label="Current bag weight">
+                <div class="bag-fill" id="bag-fill">Empty</div>
+              </div>
+              <div class="bag-caption">
+                <span id="bag-weight">Weight 0 / 7</span>
+                <span id="bag-value">Value 0</span>
+              </div>
+            </div>
+
+            <div class="decision-view" aria-live="polite">
+              <span class="step-label" id="sim-step-label">Step 1 of 8</span>
+              <h4 id="sim-title">Begin with no items</h4>
+              <p class="decision-text" id="sim-description">
+                With no available items, every capacity has value 0.
+              </p>
+              <div class="choice-grid">
+                <div class="choice">
+                  <span>Exclude</span>
+                  <strong id="exclude-value">—</strong>
+                </div>
+                <div class="choice">
+                  <span>Include</span>
+                  <strong id="include-value">—</strong>
+                </div>
+                <div class="choice keep">
+                  <span>Keep</span>
+                  <strong id="keep-value">0</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-scroll">
+            <table
+              class="dp-table"
+              aria-label="Interactive dynamic programming table"
+            >
+              <thead>
+                <tr>
+                  <th rowspan="2" scope="col">Items considered</th>
+                  <th colspan="8" scope="colgroup">Capacity</th>
+                </tr>
+                <tr>
+                  <th>0</th><th>1</th><th>2</th><th>3</th>
+                  <th>4</th><th>5</th><th>6</th><th>7</th>
+                </tr>
+              </thead>
+              <tbody id="sim-table-body"></tbody>
+            </table>
+          </div>
+
+          <div class="sim-controls">
+            <button type="button" id="previous-step">← Previous</button>
+            <button type="button" class="next-button" id="next-step">
+              Next decision →
+            </button>
+            <button type="button" id="key-decision">
+              Show A + B decision
+            </button>
+            <button type="button" id="final-step">Show final answer</button>
+          </div>
+        </div>
+
+        <ol class="steps">
+          <li>
+            <span>1</span>
+            <p><strong>Build the table.</strong> Start with zeros for no items.</p>
+          </li>
+          <li>
+            <span>2</span>
+            <p>
+              <strong>Compare include and exclude.</strong> For Item B at
+              capacity 7: exclude gives 10, include gives 12 + 10 = 22.
+            </p>
+          </li>
+          <li>
+            <span>3</span>
+            <p>
+              <strong>Backtrack.</strong> Move upward through the completed
+              table to find which items produced the final value.
+            </p>
+          </li>
+        </ol>
+
+        <div class="result">
+          <strong>Final answer:</strong> select Item A and Item B. Total weight
+          is 7 and maximum value is 22.
+        </div>
+      </section>
+
+      <section id="tsp">
+        <p class="label" style="color: var(--teal)">Problem 3</p>
+        <h2>Travelling Salesman using a Genetic Algorithm</h2>
+        <p class="summary">
+          Find a short route that visits every city once and returns to the
+          starting city. A genetic algorithm searches for a good route, but it
+          does not guarantee the mathematical optimum for every input.
+        </p>
+
+        <div class="route-area">
+          <svg viewBox="0 0 400 400" role="img" aria-label="TSP route A to D to C to B to E and back to A">
+            <line class="route-line" x1="70" y1="330" x2="330" y2="330" />
+            <line class="route-line" x1="330" y1="330" x2="330" y2="70" />
+            <line class="route-line" x1="330" y1="70" x2="70" y2="70" />
+            <line class="route-line" x1="70" y1="70" x2="200" y2="200" />
+            <line class="route-line" x1="200" y1="200" x2="70" y2="330" />
+
+            <circle class="city" cx="70" cy="330" r="25" />
+            <circle class="city" cx="70" cy="70" r="25" />
+            <circle class="city" cx="330" cy="70" r="25" />
+            <circle class="city" cx="330" cy="330" r="25" />
+            <circle class="city" cx="200" cy="200" r="25" />
+
+            <text class="city-label" x="70" y="330">A</text>
+            <text class="city-label" x="70" y="70">B</text>
+            <text class="city-label" x="330" y="70">C</text>
+            <text class="city-label" x="330" y="330">D</text>
+            <text class="city-label" x="200" y="200">E</text>
+          </svg>
+
+          <div>
+            <h3>How one route is represented</h3>
+            <div class="formula">[0, 3, 2, 1, 4]</div>
+            <p>This means:</p>
+            <p><strong>A → D → C → B → E → A</strong></p>
+            <p>
+              The program adds every edge distance, including the final return
+              from E to A.
+            </p>
+          </div>
+        </div>
+
+        <h3>The genetic cycle</h3>
+        <div class="operator-flow">
+          <strong>Create population</strong><span>→</span>
+          <strong>Select parents</strong><span>→</span>
+          <strong>Crossover</strong><span>→</span>
+          <strong>Mutation</strong><span>→</span>
+          <strong>Elitism</strong>
+        </div>
+
+        <ol class="steps ga-steps">
+          <li>
+            <span>1</span>
+            <p>
+              <strong>Create random routes.</strong> Fisher-Yates shuffling
+              produces valid permutations of the city indexes.
+            </p>
+          </li>
+          <li>
+            <span>2</span>
+            <p>
+              <strong>Select shorter parents.</strong> Tournament selection
+              compares several routes and chooses the shortest.
+            </p>
+          </li>
+          <li>
+            <span>3</span>
+            <p>
+              <strong>Create children.</strong> Ordered crossover combines the
+              parents without duplicating or losing cities.
+            </p>
+          </li>
+          <li>
+            <span>4</span>
+            <p>
+              <strong>Add variation.</strong> Swap mutation may exchange two
+              city positions.
+            </p>
+          </li>
+          <li>
+            <span>5</span>
+            <p>
+              <strong>Keep the best.</strong> Elitism copies the shortest route
+              into the next generation so progress is not lost.
+            </p>
+          </li>
+        </ol>
+
+        <div class="result tsp-result">
+          <strong>Default sample:</strong> population 60, generations 150,
+          mutation rate 0.10, seed 2103. The reproducible route above has total
+          distance 15.00.
+        </div>
+      </section>
+
+      <section id="run">
+        <p class="label" style="color: var(--ink)">Run and test</p>
+        <h2>Use the real Python programs</h2>
+
+        <h3>Run Problem 2</h3>
+        <pre><code>python3 problem2_knapsack_dp/main.py</code></pre>
+
+        <h3>Run Problem 3</h3>
+        <pre><code>python3 problem3_tsp_genetic/main.py</code></pre>
+
+        <h3>Run all tests for Problems 2 and 3</h3>
+        <pre><code>python3 -m unittest -v problem2_knapsack_dp.test_knapsack problem3_tsp_genetic.test_genetic</code></pre>
+        <p>A successful test run ends with <code>Ran 25 tests</code> and <code>OK</code>.</p>
+
+        <div class="test-list">
+          <article>
+            <h3>Manual Knapsack test</h3>
+            <p>
+              Use capacity 0. Expected result: no selected items and maximum
+              value 0.
+            </p>
+          </article>
+          <article>
+            <h3>Manual TSP test</h3>
+            <p>
+              Use the square A(0,0), B(0,1), C(1,1), D(1,0). Expected shortest
+              closed distance: 4.00.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="say-it">
+        <h2>How to explain it to your lecturer</h2>
+        <blockquote>
+          Knapsack stores the best value for every smaller item-and-capacity
+          problem. Each cell compares including and excluding the current item,
+          and backtracking finds the selected items.
+        </blockquote>
+        <blockquote>
+          The TSP genetic algorithm improves a population of route permutations
+          using selection, crossover, mutation, and elitism. It finds a good
+          route efficiently but may not find the global optimum.
+        </blockquote>
+      </section>
+    </main>
+
+    <footer>
+      CSC2103 Algorithm Guide · Open this file directly in any web browser.
+    </footer>
+
+    <script>
+      const dpRows = [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 10, 10, 10, 10, 10],
+        [0, 0, 0, 10, 12, 12, 12, 22],
+        [0, 0, 7, 10, 12, 17, 19, 22],
+        [0, 0, 7, 10, 12, 17, 19, 22],
+      ];
+
+      const rowLabels = ["None", "A", "A, B", "A, B, C", "A, B, C, D"];
+
+      const visualSteps = [
+        {
+          title: "Begin with no items",
+          description:
+            "With no available items, every capacity has value 0.",
+          visible: [7, -1, -1, -1, -1],
+          current: null,
+          exclude: "—",
+          include: "—",
+          keep: "0",
+          bag: "Empty",
+          weight: 0,
+          value: 0,
+        },
+        {
+          title: "Can Item A fit at capacity 3?",
+          description:
+            "A weighs 3 and has value 10. It fits exactly, so including A is better than the previous value 0.",
+          visible: [7, 3, -1, -1, -1],
+          current: [1, 3],
+          exclude: "0",
+          include: "10 + 0 = 10",
+          keep: "10",
+          bag: "A",
+          weight: 3,
+          value: 10,
+        },
+        {
+          title: "Finish the Item A row",
+          description:
+            "At every capacity from 3 to 7, A fits and gives value 10.",
+          visible: [7, 7, -1, -1, -1],
+          current: [1, 7],
+          exclude: "0",
+          include: "10 + 0 = 10",
+          keep: "10",
+          bag: "A",
+          weight: 3,
+          value: 10,
+        },
+        {
+          title: "Compare Item B at capacity 4",
+          description:
+            "B weighs 4. Excluding B keeps A's value 10; including B gives 12, so the table keeps 12.",
+          visible: [7, 7, 4, -1, -1],
+          current: [2, 4],
+          exclude: "10",
+          include: "12 + 0 = 12",
+          keep: "12",
+          bag: "B",
+          weight: 4,
+          value: 12,
+        },
+        {
+          title: "The key decision: Item B at capacity 7",
+          description:
+            "After taking B, 3 capacity remains. The earlier row says capacity 3 can hold A for value 10. Therefore B + A gives 22.",
+          visible: [7, 7, 7, -1, -1],
+          current: [2, 7],
+          exclude: "10",
+          include: "12 + 10 = 22",
+          keep: "22",
+          bag: "A + B",
+          weight: 7,
+          value: 22,
+        },
+        {
+          title: "Does Item C improve capacity 7?",
+          description:
+            "Including C gives 7 plus the earlier best value 12 at remaining capacity 5. That is 19, so excluding C keeps 22.",
+          visible: [7, 7, 7, 7, -1],
+          current: [3, 7],
+          exclude: "22",
+          include: "7 + 12 = 19",
+          keep: "22",
+          bag: "A + B",
+          weight: 7,
+          value: 22,
+        },
+        {
+          title: "Does Item D improve capacity 7?",
+          description:
+            "Including D gives 14 plus the earlier best value 7 at remaining capacity 2. That is 21, so the table still keeps 22.",
+          visible: [7, 7, 7, 7, 7],
+          current: [4, 7],
+          exclude: "22",
+          include: "14 + 7 = 21",
+          keep: "22",
+          bag: "A + B",
+          weight: 7,
+          value: 22,
+        },
+        {
+          title: "Backtrack to find the selected items",
+          description:
+            "D and C do not change the value, so skip them. B changes 10 to 22, so take B. The remaining capacity is 3, where A changes 0 to 10, so take A.",
+          visible: [7, 7, 7, 7, 7],
+          current: null,
+          path: [
+            [4, 7],
+            [3, 7],
+            [2, 7],
+            [1, 3],
+          ],
+          exclude: "Skip D and C",
+          include: "Take B and A",
+          keep: "A + B",
+          bag: "A + B",
+          weight: 7,
+          value: 22,
+        },
+      ];
+
+      const tableBody = document.getElementById("sim-table-body");
+      const stepLabel = document.getElementById("sim-step-label");
+      const title = document.getElementById("sim-title");
+      const description = document.getElementById("sim-description");
+      const excludeValue = document.getElementById("exclude-value");
+      const includeValue = document.getElementById("include-value");
+      const keepValue = document.getElementById("keep-value");
+      const bagFill = document.getElementById("bag-fill");
+      const bagWeight = document.getElementById("bag-weight");
+      const bagValue = document.getElementById("bag-value");
+      const previousButton = document.getElementById("previous-step");
+      const nextButton = document.getElementById("next-step");
+      const keyButton = document.getElementById("key-decision");
+      const finalButton = document.getElementById("final-step");
+      let visualStep = 0;
+
+      function renderVisualizer() {
+        const state = visualSteps[visualStep];
+        tableBody.innerHTML = "";
+
+        dpRows.forEach((row, rowIndex) => {
+          const tableRow = document.createElement("tr");
+          const heading = document.createElement("th");
+          heading.scope = "row";
+          heading.textContent = rowLabels[rowIndex];
+          tableRow.appendChild(heading);
+
+          row.forEach((cellValue, columnIndex) => {
+            const cell = document.createElement("td");
+            const isVisible = columnIndex <= state.visible[rowIndex];
+            const isCurrent =
+              state.current &&
+              state.current[0] === rowIndex &&
+              state.current[1] === columnIndex;
+            const isPath =
+              state.path &&
+              state.path.some(
+                (point) =>
+                  point[0] === rowIndex && point[1] === columnIndex,
+              );
+
+            cell.textContent = isVisible ? cellValue : "·";
+            if (!isVisible) cell.classList.add("sim-cell-hidden");
+            if (isCurrent) cell.classList.add("sim-cell-current");
+            if (isPath) cell.classList.add("sim-cell-path");
+            tableRow.appendChild(cell);
+          });
+
+          tableBody.appendChild(tableRow);
+        });
+
+        stepLabel.textContent =
+          "Step " + (visualStep + 1) + " of " + visualSteps.length;
+        title.textContent = state.title;
+        description.textContent = state.description;
+        excludeValue.textContent = state.exclude;
+        includeValue.textContent = state.include;
+        keepValue.textContent = state.keep;
+        bagFill.textContent = state.bag;
+        bagFill.style.width = (state.weight / 7) * 100 + "%";
+        bagWeight.textContent = "Weight " + state.weight + " / 7";
+        bagValue.textContent = "Value " + state.value;
+        previousButton.disabled = visualStep === 0;
+        nextButton.disabled = visualStep === visualSteps.length - 1;
+      }
+
+      previousButton.addEventListener("click", () => {
+        visualStep = Math.max(0, visualStep - 1);
+        renderVisualizer();
+      });
+
+      nextButton.addEventListener("click", () => {
+        visualStep = Math.min(visualSteps.length - 1, visualStep + 1);
+        renderVisualizer();
+      });
+
+      keyButton.addEventListener("click", () => {
+        visualStep = 4;
+        renderVisualizer();
+      });
+
+      finalButton.addEventListener("click", () => {
+        visualStep = visualSteps.length - 1;
+        renderVisualizer();
+      });
+
+      renderVisualizer();
+    </script>
+  </body>
+</html>
