@@ -1,7 +1,7 @@
-"""Kuala Lumpur Shortest Path Route Planner using Dijkstra's algorithm."""
+"""Kuala Lumpur Landmark Route Planner using Dijkstra's algorithm."""
 
 # A value used to represent a location that has not been reached yet.
-INFINITY = float("10000000")
+INFINITY = float("inf")
 
 
 def dijkstra(graph, start):
@@ -113,11 +113,12 @@ def reconstruct_path(previous, start, destination):
     return path
 
 
-def kl_data():
-    """Return the Kuala Lumpur landmark network.
+def sample_data():
+    """Return a built-in Kuala Lumpur landmark network.
 
     The distances are approximate demonstration values in kilometres.
-     """
+    They are not intended to replace live navigation data.
+    """
     # Each position in this list matches one row and column in the graph.
     names = [
         "KL Sentral",
@@ -386,7 +387,7 @@ def main():
         print("KUALA LUMPUR LANDMARK ROUTE PLANNER")
         print("Using Dijkstra's Shortest Path Algorithm")
         print("=" * 62)
-        print("1. Use the Kuala Lumpur landmark data")
+        print("1. Use built-in Kuala Lumpur landmark data")
         print("2. Create a custom location network")
         print("3. Exit")
 
@@ -398,9 +399,9 @@ def main():
             print("Goodbye!")
             break
 
-        # Load the landmark graph.
+        # Load the built-in landmark graph.
         if choice == 1:
-            names, graph, default_start = kl_data()
+            names, graph, default_start = sample_data()
             display_locations(names)
             start = select_location(
                 names,
