@@ -45,11 +45,12 @@ class GeneticAlgorithmTests(unittest.TestCase):
         self.assertEqual(len(child), len(parent_one))
         self.assertEqual(set(child), set(parent_one))
 
-    def test_mutation_preserves_valid_permutation(self):
+    def test_forced_mutation_swaps_distinct_positions(self):
         route = [0, 1, 2, 3, 4]
-        child = mutate(route, 1.0, random.Random(8))
+        child = mutate(route, 1.0, random.Random(2))
         self.assertEqual(len(child), len(route))
         self.assertEqual(set(child), set(route))
+        self.assertNotEqual(child, route)
         self.assertEqual(route, [0, 1, 2, 3, 4])
 
     def test_same_seed_is_reproducible(self):

@@ -88,9 +88,11 @@ def ordered_crossover(parent_one, parent_two, rng):
 def mutate(route, mutation_rate, rng):
     """Return a copy, occasionally swapping two city positions."""
     child = route[:]
-    if rng.random() < mutation_rate:
+    if len(child) >= 2 and rng.random() < mutation_rate:
         first = rng.randrange(len(child))
-        second = rng.randrange(len(child))
+        second = rng.randrange(len(child) - 1)
+        if second >= first:
+            second += 1
         child[first], child[second] = child[second], child[first]
     return child
 
