@@ -17,10 +17,11 @@ but does not guarantee the global optimum for every data set.
 
 ## Route Representation and Distance
 
-A chromosome is a permutation of city indexes. For example:
+A chromosome is a permutation of city indexes. Using the built-in Malaysian
+city data, for example:
 
 ```text
-[0, 3, 2, 1] means A -> D -> C -> B -> A
+[0, 3, 2, 1, 4] means Subang Jaya -> Ipoh -> Shah Alam -> Kuala Lumpur -> Rawang -> Subang Jaya
 ```
 
 Every city appears exactly once in the list. `route_distance` uses Euclidean
@@ -83,16 +84,16 @@ can explore a different sequence of candidate routes.
 
 | City | X | Y |
 | --- | ---: | ---: |
-| A | 0 | 0 |
-| B | 0 | 4 |
-| C | 3 | 4 |
-| D | 3 | 0 |
-| E | 1.5 | 2 |
+| Subang Jaya | 0 | 0 |
+| Kuala Lumpur | 0 | 4 |
+| Shah Alam | 3 | 4 |
+| Ipoh | 3 | 0 |
+| Rawang | 1.5 | 2 |
 
 With the default settings, the expected reproducible result is:
 
 ```text
-A -> D -> C -> B -> E -> A
+Subang Jaya -> Ipoh -> Shah Alam -> Kuala Lumpur -> Rawang -> Subang Jaya
 Total distance: 15.00
 ```
 

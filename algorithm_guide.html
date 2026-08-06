@@ -690,7 +690,11 @@
         </p>
 
         <div class="route-area">
-          <svg viewBox="0 0 400 400" role="img" aria-label="TSP route A to D to C to B to E and back to A">
+          <svg
+            viewBox="0 0 400 400"
+            role="img"
+            aria-label="TSP route from Subang Jaya to Ipoh, Shah Alam, Kuala Lumpur, Rawang, and back to Subang Jaya"
+          >
             <line class="route-line" x1="70" y1="330" x2="330" y2="330" />
             <line class="route-line" x1="330" y1="330" x2="330" y2="70" />
             <line class="route-line" x1="330" y1="70" x2="70" y2="70" />
@@ -703,21 +707,26 @@
             <circle class="city" cx="330" cy="330" r="25" />
             <circle class="city" cx="200" cy="200" r="25" />
 
-            <text class="city-label" x="70" y="330">A</text>
-            <text class="city-label" x="70" y="70">B</text>
-            <text class="city-label" x="330" y="70">C</text>
-            <text class="city-label" x="330" y="330">D</text>
-            <text class="city-label" x="200" y="200">E</text>
+            <text class="city-label" x="70" y="330">SJ</text>
+            <text class="city-label" x="70" y="70">KL</text>
+            <text class="city-label" x="330" y="70">SA</text>
+            <text class="city-label" x="330" y="330">IP</text>
+            <text class="city-label" x="200" y="200">RW</text>
           </svg>
 
           <div>
             <h3>How one route is represented</h3>
             <div class="formula">[0, 3, 2, 1, 4]</div>
             <p>This means:</p>
-            <p><strong>A → D → C → B → E → A</strong></p>
+            <p>
+              <strong>
+                Subang Jaya → Ipoh → Shah Alam → Kuala Lumpur →
+                Rawang → Subang Jaya
+              </strong>
+            </p>
             <p>
               The program adds every edge distance, including the final return
-              from E to A.
+              from Rawang to Subang Jaya.
             </p>
           </div>
         </div>
