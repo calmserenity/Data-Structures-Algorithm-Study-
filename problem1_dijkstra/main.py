@@ -196,9 +196,22 @@ def display_locations(names):
     print("-" * 45)
 
 
-def select_location(names, prompt):
+def select_location(names, prompt, default=None):
     """Ask the user to select a location."""
-    return read_integer(prompt, 1, len(names)) - 1
+    while True:
+        choice = input(prompt).strip()
+
+        if choice == "" and default is not None:
+            return default
+
+        try:
+            value = int(choice)
+            if 1 <= value <= len(names):
+                return value - 1
+        except ValueError:
+            pass
+
+        print(f"Please enter a whole number from 1 to {len(names)}.")
 
 
 def custom_data():
@@ -283,7 +296,7 @@ def format_distance(distance):
 def display_single_route(names, distances, previous, start, destination):
     """Display the shortest route to one destination."""
     print("\n" + "=" * 62)
-    print("KUALA LUMPUR SHORTEST ROUTE RESULT")
+    print("SHORTEST ROUTE RESULT")
     print("=" * 62)
     print(f"Starting location : {names[start]}")
     print(f"Destination       : {names[destination]}")
