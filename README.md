@@ -1,43 +1,98 @@
-# Data Structures & Algorithm 
+# Data Structures and Algorithms Study
 
-This project contains three independent console-based Python programs:
+This repository contains three independent console-based Python programs for
+the CSC2103 group assignment:
 
-1. `problem1_dijkstra` - Dijkstra's greedy shortest-path algorithm
-2. `problem2_knapsack_dp` - 0/1 Knapsack using dynamic programming
-3. `problem3_tsp_genetic` - Travelling Salesman Problem using a genetic algorithm
+1. `problem1_dijkstra` - Dijkstra's greedy shortest-path algorithm.
+2. `problem2_knapsack_dp` - 0/1 Knapsack using dynamic programming.
+3. `problem3_tsp_genetic` - Travelling Salesman Problem using a genetic
+   algorithm.
 
-Each problem folder contains its own program, tests, and notes for the report.
+Each problem folder contains the program, automated tests, and notes that can
+be adapted for the assignment report.
 
 ## Requirements
 
-- Python 3.10 or newer
-- No external packages are required
+- Python 3.10 or newer.
+- No external packages.
 
-## Run a program
+The core algorithms use only code written in this repository. Standard-library
+utilities are used for data classes, console input, mathematics, random-number
+generation, and automated testing.
 
-From this project folder:
+## Run Problem 2: 0/1 Knapsack
 
-```powershell
-python problem1_dijkstra/main.py
-python problem2_knapsack_dp/main.py
-python problem3_tsp_genetic/main.py
+From the repository root:
+
+```bash
+python3 problem2_knapsack_dp/main.py
 ```
 
-Each program offers built-in sample data as well as custom keyboard input.
+Press Enter at the first prompt to use the built-in sample. Enter `n` to provide
+your own item names, integer weights, integer values, and knapsack capacity.
+Invalid values are rejected and requested again.
 
-## Run all tests
+The sample has capacity 7 and the following unique optimum:
 
-```powershell
-python -m unittest -v problem1_dijkstra.test_dijkstra problem2_knapsack_dp.test_knapsack problem3_tsp_genetic.test_genetic
+```text
+Selected items: Item A, Item B
+Total weight: 7 / 7
+Maximum value: 22
 ```
 
-## Before submission
+The completed dynamic-programming table is returned by `solve_knapsack` for
+testing and explanation, but it is not printed because large capacities can
+make it too wide for a console.
 
-- Replace or extend the sample data with your group's own test cases.
-- Make sure every member understands and can explain the algorithms.
-- Capture screenshots of meaningful program runs.
-- Complete each folder's `REPORT_NOTES.md`.
-- Include expected-versus-actual results in the report.
-- Declare that AI assisted with the initial project structure and code boilerplate.
-- Verify the source code manually and modify it as your group considers appropriate.
+## Run Problem 3: TSP Genetic Algorithm
 
+From the repository root:
+
+```bash
+python3 problem3_tsp_genetic/main.py
+```
+
+Press Enter to use the built-in cities or enter `n` to provide at least three
+city names and coordinates. After the cities are displayed, choose either the
+default genetic settings or custom settings.
+
+The defaults are:
+
+| Setting | Value |
+| --- | ---: |
+| Population size | 60 |
+| Generations | 150 |
+| Mutation rate | 0.10 |
+| Random seed | 2103 |
+
+The fixed seed makes the default sample reproducible for testing and report
+screenshots. A genetic algorithm is heuristic: it aims to find a short route
+efficiently but does not guarantee the global optimum for every input.
+
+## Run Tests
+
+Run the tests for the two implemented assignment sections:
+
+```bash
+python3 -m unittest -v problem2_knapsack_dp.test_knapsack problem3_tsp_genetic.test_genetic
+```
+
+Run all three problem suites:
+
+```bash
+python3 -m unittest -v problem1_dijkstra.test_dijkstra problem2_knapsack_dp.test_knapsack problem3_tsp_genetic.test_genetic
+```
+
+## Before Submission
+
+- Run both sample and custom-input paths.
+- Add or adapt test cases that the group can explain.
+- Capture readable screenshots of inputs and results.
+- Transfer the relevant material from each `REPORT_NOTES.md` into the final
+  report.
+- Include expected-versus-actual results and explain how correctness was
+  checked.
+- Ensure every member understands the recurrence used by 0/1 Knapsack and the
+  genetic operators used by TSP.
+- Declare the parts assisted by generative AI and explain how the group manually
+  reviewed and verified them.

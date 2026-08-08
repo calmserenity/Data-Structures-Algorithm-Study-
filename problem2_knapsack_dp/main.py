@@ -11,16 +11,28 @@ class Item:
 
 
 def solve_knapsack(items, capacity):
-    """Return maximum value, selected items, and the DP table."""
-    if capacity < 0:
-        raise ValueError("Capacity cannot be negative.")
+    """Return the maximum value, selected items, and completed DP table.
+
+    ``table[i][w]`` stores the best value obtainable from the first ``i``
+    items when the knapsack capacity is ``w``.
+    """
+    if type(capacity) is not int or capacity < 0:
+        raise ValueError("Capacity must be a non-negative integer.")
+
     for item in items:
-        if item.weight <= 0 or item.value < 0:
-            raise ValueError("Weights must be positive and values non-negative.")
+        if not isinstance(item, Item):
+            raise ValueError("Every item must be an Item instance.")
+        if type(item.weight) is not int or item.weight <= 0:
+            raise ValueError("Every item weight must be a positive integer.")
+        if type(item.value) is not int or item.value < 0:
+            raise ValueError("Every item value must be a non-negative integer.")
 
     item_count = len(items)
     table = [[0 for _ in range(capacity + 1)] for _ in range(item_count + 1)]
 
+    # Reusing the previous row solves the overlapping subproblems only once.
+    # The recurrence also shows optimal substructure: the best answer is the
+    # better of excluding the current item or including it when it fits.
     for item_number in range(1, item_count + 1):
         item = items[item_number - 1]
         for current_capacity in range(capacity + 1):
@@ -33,14 +45,21 @@ def solve_knapsack(items, capacity):
                     + table[item_number - 1][current_capacity - item.weight]
                 )
 
+            # Strictly greater preserves a deterministic tie rule: if both
+            # choices have equal value, the later item remains excluded.
             table[item_number][current_capacity] = (
                 include_value if include_value > exclude_value else exclude_value
             )
 
+    # Walk backwards through the completed table. A changed value means that
+    # the current item was used by the optimal solution for this capacity.
     selected = []
     remaining_capacity = capacity
     for item_number in range(item_count, 0, -1):
-        if table[item_number][remaining_capacity] != table[item_number - 1][remaining_capacity]:
+        if (
+            table[item_number][remaining_capacity]
+            != table[item_number - 1][remaining_capacity]
+        ):
             item = items[item_number - 1]
             selected.append(item)
             remaining_capacity -= item.weight
@@ -54,20 +73,37 @@ def sample_data():
         Item("Item A", 3, 10),
         Item("Item B", 4, 12),
         Item("Item C", 2, 7),
-        Item("Item D", 5, 15),
+        Item("Item D", 5, 14),
     ]
     return items, 7
 
 
-def read_integer(prompt, minimum):
+def read_yes_no(prompt, default=True):
+    """Read a yes/no answer, using ``default`` when Enter is pressed."""
+    while True:
+        answer = input(prompt).strip().lower()
+        if not answer:
+            return default
+        if answer in ("y", "yes"):
+            return True
+        if answer in ("n", "no"):
+            return False
+        print("Enter Y for yes or N for no.")
+
+
+def read_integer(prompt, minimum, maximum=None):
+    """Read an integer within the inclusive requested range."""
     while True:
         try:
             value = int(input(prompt))
-            if value < minimum:
+            if value < minimum or (maximum is not None and value > maximum):
                 raise ValueError
             return value
         except ValueError:
-            print(f"Enter a whole number of at least {minimum}.")
+            if maximum is None:
+                print(f"Enter a whole number of at least {minimum}.")
+            else:
+                print(f"Enter a whole number from {minimum} to {maximum}.")
 
 
 def custom_data():
@@ -83,32 +119,45 @@ def custom_data():
     return items, capacity
 
 
+def display_items(items, capacity):
+    """Display all available items before solving the problem."""
+    print("\nAVAILABLE ITEMS")
+    print("-" * 56)
+    print(f"{'No.':<6}{'Item':<24}{'Weight':>12}{'Value':>12}")
+    print("-" * 56)
+    for number, item in enumerate(items, start=1):
+        print(f"{number:<6}{item.name:<24}{item.weight:>12}{item.value:>12}")
+    print("-" * 56)
+    print(f"Knapsack capacity: {capacity}")
+
+
 def display_results(maximum_value, selected, capacity):
     print("\nKNAPSACK RESULTS")
-    print("-" * 50)
+    print("-" * 56)
     if not selected:
         print("No items were selected.")
-        return
-
-    print(f"{'Item':<20}{'Weight':>10}{'Value':>10}")
-    print("-" * 50)
-    for item in selected:
-        print(f"{item.name:<20}{item.weight:>10}{item.value:>10}")
+    else:
+        print(f"{'Item':<28}{'Weight':>14}{'Value':>14}")
+        print("-" * 56)
+        for item in selected:
+            print(f"{item.name:<28}{item.weight:>14}{item.value:>14}")
 
     total_weight = sum(item.weight for item in selected)
-    print("-" * 50)
+    print("-" * 56)
+    print(f"Selected items: {len(selected)}")
     print(f"Total weight: {total_weight} / {capacity}")
+    print(f"Remaining capacity: {capacity - total_weight}")
     print(f"Maximum value: {maximum_value}")
 
 
 def main():
     print("0/1 KNAPSACK USING DYNAMIC PROGRAMMING")
-    choice = input("Use sample data? (Y/n): ").strip().lower()
-    items, capacity = sample_data() if choice != "n" else custom_data()
+    use_sample = read_yes_no("Use sample data? (Y/n): ", default=True)
+    items, capacity = sample_data() if use_sample else custom_data()
+    display_items(items, capacity)
     maximum_value, selected, _ = solve_knapsack(items, capacity)
     display_results(maximum_value, selected, capacity)
 
 
 if __name__ == "__main__":
     main()
-
