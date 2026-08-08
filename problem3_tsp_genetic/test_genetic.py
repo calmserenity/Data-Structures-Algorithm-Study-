@@ -7,6 +7,8 @@ from unittest.mock import patch
 from problem3_tsp_genetic import main as tsp_program
 from problem3_tsp_genetic.main import (
     City,
+    EvaluatedRoute,
+    best_route,
     build_distance_matrix,
     genetic_algorithm,
     mutate,
@@ -19,6 +21,18 @@ from problem3_tsp_genetic.main import (
 
 
 class GeneticAlgorithmTests(unittest.TestCase):
+    def test_best_route_keeps_route_and_cached_distance_together(self):
+        population = [
+            EvaluatedRoute([0, 1, 2], 12.0),
+            EvaluatedRoute([0, 2, 1], 8.5),
+            EvaluatedRoute([1, 0, 2], 10.0),
+        ]
+
+        route, total = best_route(population)
+
+        self.assertEqual(route, [0, 2, 1])
+        self.assertEqual(total, 8.5)
+
     def test_route_closes_the_square(self):
         cities = [
             City("A", 0, 0),

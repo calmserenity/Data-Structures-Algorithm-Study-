@@ -22,6 +22,14 @@ class City:
     y: float
 
 
+@dataclass
+class EvaluatedRoute:
+    """Keep a candidate route together with its cached distance."""
+
+    route: list
+    distance: float
+
+
 def distance(first, second):
     return math.sqrt((first.x - second.x) ** 2 + (first.y - second.y) ** 2)
 
@@ -71,14 +79,14 @@ def random_route(city_count, rng):
     return route
 
 
-def tournament_selection(population, scores, rng, tournament_size=3):
-    """Select a route by comparing already-cached distance scores."""
-    best_index = rng.randrange(len(population))
+def tournament_selection(population, rng, tournament_size=3):
+    """Select a route by comparing evaluated candidates."""
+    best = population[rng.randrange(len(population))]
     for _ in range(tournament_size - 1):
-        candidate_index = rng.randrange(len(population))
-        if scores[candidate_index] < scores[best_index]:
-            best_index = candidate_index
-    return population[best_index][:]
+        candidate = population[rng.randrange(len(population))]
+        if candidate.distance < best.distance:
+            best = candidate
+    return best.route[:]
 
 
 def ordered_crossover(parent_one, parent_two, rng):
@@ -121,13 +129,13 @@ def mutate(route, mutation_rate, rng):
     return child
 
 
-def best_route(population, scores):
-    """Return the route with the smallest cached distance score."""
-    best_index = 0
-    for candidate_index in range(1, len(population)):
-        if scores[candidate_index] < scores[best_index]:
-            best_index = candidate_index
-    return population[best_index][:], scores[best_index]
+def best_route(population):
+    """Return the route with the smallest cached distance."""
+    best = population[0]
+    for candidate in population[1:]:
+        if candidate.distance < best.distance:
+            best = candidate
+    return best.route[:], best.distance
 
 
 def normalize_route(route, start_city=0):
@@ -174,30 +182,31 @@ def genetic_algorithm(
 
     rng = random.Random(seed)
     distance_matrix = build_distance_matrix(cities)
-    population = [random_route(len(cities), rng) for _ in range(population_size)]
-    scores = [
-        route_distance_from_matrix(route, distance_matrix)
-        for route in population
-    ]
-    overall_best, overall_distance = best_route(population, scores)
+    population = []
+    for _ in range(population_size):
+        route = random_route(len(cities), rng)
+        population.append(
+            EvaluatedRoute(
+                route=route,
+                distance=route_distance_from_matrix(route, distance_matrix),
+            )
+        )
+    overall_best, overall_distance = best_route(population)
 
     for _ in range(generations):
         # Elitism keeps the best solution found in the next population.
-        new_population = [overall_best[:]]
-        new_scores = [overall_distance]
+        new_population = [EvaluatedRoute(overall_best[:], overall_distance)]
 
         while len(new_population) < population_size:
-            parent_one = tournament_selection(population, scores, rng)
-            parent_two = tournament_selection(population, scores, rng)
+            parent_one = tournament_selection(population, rng)
+            parent_two = tournament_selection(population, rng)
             child = ordered_crossover(parent_one, parent_two, rng)
             child = mutate(child, mutation_rate, rng)
             child_distance = route_distance_from_matrix(child, distance_matrix)
-            new_population.append(child)
-            new_scores.append(child_distance)
+            new_population.append(EvaluatedRoute(child, child_distance))
 
         population = new_population
-        scores = new_scores
-        generation_best, generation_distance = best_route(population, scores)
+        generation_best, generation_distance = best_route(population)
         if generation_distance < overall_distance:
             overall_best = generation_best
             overall_distance = generation_distance
