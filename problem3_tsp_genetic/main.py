@@ -120,7 +120,7 @@ def ordered_crossover(parent_one, parent_two, rng):
 
 
 def mutate(route, mutation_rate, rng):
-    """Return a copy, occasionally swapping two city positions."""
+    """Return a copy, occasionally swapping two delivery-point positions."""
     child = route[:]
     if len(child) >= 2 and rng.random() < mutation_rate:
         first = rng.randrange(len(child))
@@ -213,8 +213,8 @@ def genetic_algorithm(
             overall_best = generation_best
             overall_distance = generation_distance
 
-    # A tour is cyclic, so rotating it to the first input city changes only
-    # presentation and not its total distance.
+    # A tour is cyclic, so rotating it to the depot changes only presentation
+    # and not its total distance.
     return normalize_route(overall_best), overall_distance
 
 

@@ -65,7 +65,7 @@ The completed dynamic-programming table is returned by `solve_knapsack` for
 testing and explanation, but it is not printed because large capacities can
 make it too wide for a console.
 
-## Run Problem 3: TSP Genetic Algorithm
+## Run Problem 3: Package-Delivery TSP Genetic Algorithm
 
 From the repository root:
 
@@ -73,8 +73,9 @@ From the repository root:
 python3 problem3_tsp_genetic/main.py
 ```
 
-Press Enter to use the built-in cities or enter `n` to provide at least three
-city names and coordinates. After the cities are displayed, choose either the
+Press Enter to use the built-in distribution depot and four package-delivery
+stops. Enter `n` to provide a custom depot and at least two delivery stops with
+their coordinates. After the delivery points are displayed, choose either the
 default genetic settings or custom settings.
 
 The defaults are:
@@ -89,6 +90,16 @@ The defaults are:
 The fixed seed makes the default sample reproducible for testing and report
 screenshots. A genetic algorithm is heuristic: it aims to find a short route
 efficiently but does not guarantee the global optimum for every input.
+
+The reproducible built-in result is:
+
+```text
+Distribution Depot -> Package C - Retail Store -> Package B - Apartment
+-> Package A - Office Tower -> Package D - Service Centre
+-> Distribution Depot
+Total distance: 15.00
+Packages delivered: 4
+```
 
 ## Run Tests
 

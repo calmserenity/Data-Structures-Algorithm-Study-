@@ -684,16 +684,17 @@
         <p class="label" style="color: var(--teal)">Problem 3</p>
         <h2>Travelling Salesman using a Genetic Algorithm</h2>
         <p class="summary">
-          Find a short route that visits every city once and returns to the
-          starting city. A genetic algorithm searches for a good route, but it
-          does not guarantee the mathematical optimum for every input.
+          Find a short route that starts at a distribution depot, visits every
+          package-delivery stop once, and returns to the depot. A genetic
+          algorithm searches for a good route, but it does not guarantee the
+          mathematical optimum for every input.
         </p>
 
         <div class="route-area">
           <svg
             viewBox="0 0 400 400"
             role="img"
-            aria-label="TSP route from Subang Jaya to Ipoh, Shah Alam, Kuala Lumpur, Rawang, and back to Subang Jaya"
+            aria-label="Package-delivery route from the distribution depot to Package C, Package B, Package A, Package D, and back to the depot"
           >
             <line class="route-line" x1="70" y1="330" x2="330" y2="330" />
             <line class="route-line" x1="330" y1="330" x2="330" y2="70" />
@@ -707,11 +708,11 @@
             <circle class="city" cx="330" cy="330" r="25" />
             <circle class="city" cx="200" cy="200" r="25" />
 
-            <text class="city-label" x="70" y="330">SJ</text>
-            <text class="city-label" x="70" y="70">KL</text>
-            <text class="city-label" x="330" y="70">SA</text>
-            <text class="city-label" x="330" y="330">IP</text>
-            <text class="city-label" x="200" y="200">RW</text>
+            <text class="city-label" x="70" y="330">DEP</text>
+            <text class="city-label" x="70" y="70">A</text>
+            <text class="city-label" x="330" y="70">B</text>
+            <text class="city-label" x="330" y="330">C</text>
+            <text class="city-label" x="200" y="200">D</text>
           </svg>
 
           <div>
@@ -720,13 +721,13 @@
             <p>This means:</p>
             <p>
               <strong>
-                Subang Jaya → Ipoh → Shah Alam → Kuala Lumpur →
-                Rawang → Subang Jaya
+                Distribution Depot → Package C → Package B →
+                Package A → Package D → Distribution Depot
               </strong>
             </p>
             <p>
               The program adds every edge distance, including the final return
-              from Rawang to Subang Jaya.
+              from Package D to the distribution depot.
             </p>
           </div>
         </div>
@@ -745,7 +746,7 @@
             <span>1</span>
             <p>
               <strong>Create random routes.</strong> Fisher-Yates shuffling
-              produces valid permutations of the city indexes.
+              produces valid permutations of the delivery-point indexes.
             </p>
           </li>
           <li>
@@ -759,14 +760,14 @@
             <span>3</span>
             <p>
               <strong>Create children.</strong> Ordered crossover combines the
-              parents without duplicating or losing cities.
+              parents without duplicating or losing delivery points.
             </p>
           </li>
           <li>
             <span>4</span>
             <p>
               <strong>Add variation.</strong> Swap mutation may exchange two
-              city positions.
+              delivery-point positions.
             </p>
           </li>
           <li>
