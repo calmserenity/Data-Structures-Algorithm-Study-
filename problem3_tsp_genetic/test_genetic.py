@@ -7,11 +7,13 @@ from unittest.mock import patch
 from problem3_tsp_genetic import main as tsp_program
 from problem3_tsp_genetic.main import (
     City,
+    build_distance_matrix,
     genetic_algorithm,
     mutate,
     ordered_crossover,
     read_float,
     route_distance,
+    route_distance_from_matrix,
     sample_data,
 )
 
@@ -31,6 +33,55 @@ class GeneticAlgorithmTests(unittest.TestCase):
     def test_route_distance_includes_return_edge(self):
         cities = [City("A", 0, 0), City("B", 3, 0), City("C", 3, 4)]
         self.assertAlmostEqual(route_distance([0, 1, 2], cities), 12.0)
+
+    def test_distance_matrix_is_symmetric_with_zero_diagonal(self):
+        cities = [City("A", 0, 0), City("B", 3, 0), City("C", 3, 4)]
+        matrix = build_distance_matrix(cities)
+
+        for city in range(len(cities)):
+            self.assertEqual(matrix[city][city], 0.0)
+
+        self.assertEqual(matrix[0][1], matrix[1][0])
+        self.assertEqual(matrix[1][2], matrix[2][1])
+        self.assertAlmostEqual(matrix[0][1], 3.0)
+        self.assertAlmostEqual(matrix[1][2], 4.0)
+
+    def test_matrix_route_distance_matches_direct_calculation(self):
+        cities = [
+            City("A", 0, 0),
+            City("B", 0, 2),
+            City("C", 3, 2),
+            City("D", 3, 0),
+        ]
+        route = [0, 2, 1, 3]
+        matrix = build_distance_matrix(cities)
+
+        self.assertAlmostEqual(
+            route_distance_from_matrix(route, matrix),
+            route_distance(route, cities),
+        )
+
+    def test_genetic_algorithm_evaluates_each_new_route_once(self):
+        population_size = 8
+        generations = 5
+        expected_evaluations = (
+            population_size + generations * (population_size - 1)
+        )
+
+        with patch.object(
+            tsp_program,
+            "route_distance_from_matrix",
+            wraps=route_distance_from_matrix,
+        ) as evaluator:
+            genetic_algorithm(
+                sample_data(),
+                population_size=population_size,
+                generations=generations,
+                mutation_rate=0.1,
+                seed=17,
+            )
+
+        self.assertEqual(evaluator.call_count, expected_evaluations)
 
     def test_triangle_has_known_total_distance(self):
         cities = [City("A", 0, 0), City("B", 3, 0), City("C", 0, 4)]

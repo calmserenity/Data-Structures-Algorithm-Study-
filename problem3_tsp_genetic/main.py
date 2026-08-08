@@ -35,6 +35,33 @@ def route_distance(route, cities):
     return total
 
 
+def build_distance_matrix(cities):
+    """Precompute every symmetric city-to-city distance once."""
+    city_count = len(cities)
+    matrix = [
+        [0.0 for _ in range(city_count)]
+        for _ in range(city_count)
+    ]
+
+    for first in range(city_count):
+        for second in range(first + 1, city_count):
+            value = distance(cities[first], cities[second])
+            matrix[first][second] = value
+            matrix[second][first] = value
+
+    return matrix
+
+
+def route_distance_from_matrix(route, distance_matrix):
+    """Return a closed-tour distance using precomputed edge distances."""
+    total = 0.0
+    for index in range(len(route)):
+        current = route[index]
+        following = route[(index + 1) % len(route)]
+        total += distance_matrix[current][following]
+    return total
+
+
 def random_route(city_count, rng):
     """Create a random permutation using manual Fisher-Yates shuffling."""
     route = list(range(city_count))
@@ -44,17 +71,14 @@ def random_route(city_count, rng):
     return route
 
 
-def tournament_selection(population, cities, rng, tournament_size=3):
-    """Select the shortest route from a small random tournament."""
-    best = None
-    best_distance = float("inf")
-    for _ in range(tournament_size):
-        candidate = population[rng.randrange(len(population))]
-        candidate_distance = route_distance(candidate, cities)
-        if candidate_distance < best_distance:
-            best = candidate
-            best_distance = candidate_distance
-    return best[:]
+def tournament_selection(population, scores, rng, tournament_size=3):
+    """Select a route by comparing already-cached distance scores."""
+    best_index = rng.randrange(len(population))
+    for _ in range(tournament_size - 1):
+        candidate_index = rng.randrange(len(population))
+        if scores[candidate_index] < scores[best_index]:
+            best_index = candidate_index
+    return population[best_index][:]
 
 
 def ordered_crossover(parent_one, parent_two, rng):
@@ -97,15 +121,13 @@ def mutate(route, mutation_rate, rng):
     return child
 
 
-def best_route(population, cities):
-    best = population[0]
-    best_distance = route_distance(best, cities)
-    for candidate in population[1:]:
-        candidate_distance = route_distance(candidate, cities)
-        if candidate_distance < best_distance:
-            best = candidate
-            best_distance = candidate_distance
-    return best[:], best_distance
+def best_route(population, scores):
+    """Return the route with the smallest cached distance score."""
+    best_index = 0
+    for candidate_index in range(1, len(population)):
+        if scores[candidate_index] < scores[best_index]:
+            best_index = candidate_index
+    return population[best_index][:], scores[best_index]
 
 
 def normalize_route(route, start_city=0):
@@ -151,21 +173,31 @@ def genetic_algorithm(
         raise ValueError("Random seed must be an integer.")
 
     rng = random.Random(seed)
+    distance_matrix = build_distance_matrix(cities)
     population = [random_route(len(cities), rng) for _ in range(population_size)]
-    overall_best, overall_distance = best_route(population, cities)
+    scores = [
+        route_distance_from_matrix(route, distance_matrix)
+        for route in population
+    ]
+    overall_best, overall_distance = best_route(population, scores)
 
     for _ in range(generations):
         # Elitism keeps the best solution found in the next population.
         new_population = [overall_best[:]]
+        new_scores = [overall_distance]
 
         while len(new_population) < population_size:
-            parent_one = tournament_selection(population, cities, rng)
-            parent_two = tournament_selection(population, cities, rng)
+            parent_one = tournament_selection(population, scores, rng)
+            parent_two = tournament_selection(population, scores, rng)
             child = ordered_crossover(parent_one, parent_two, rng)
-            new_population.append(mutate(child, mutation_rate, rng))
+            child = mutate(child, mutation_rate, rng)
+            child_distance = route_distance_from_matrix(child, distance_matrix)
+            new_population.append(child)
+            new_scores.append(child_distance)
 
         population = new_population
-        generation_best, generation_distance = best_route(population, cities)
+        scores = new_scores
+        generation_best, generation_distance = best_route(population, scores)
         if generation_distance < overall_distance:
             overall_best = generation_best
             overall_distance = generation_distance
