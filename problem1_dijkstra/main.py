@@ -1,9 +1,19 @@
 """Kuala Lumpur shortest-path route planner using Dijkstra's algorithm."""
 
 import math
+from dataclasses import dataclass
 from numbers import Real
 
 INFINITY = float("inf")
+
+
+@dataclass(frozen=True)
+class DijkstraStep:
+    """One greedy selection and the distance improvements it produced."""
+
+    selected: int
+    distance: float
+    updates: tuple
 
 
 def validate_graph(graph, start):
@@ -42,14 +52,15 @@ def validate_graph(graph, start):
                 )
 
 
-def dijkstra(graph, start):
-    """Return shortest distances and predecessors from the start vertex."""
+def dijkstra(graph, start, include_trace=False):
+    """Return shortest paths and, optionally, the greedy selection trace."""
     validate_graph(graph, start)
 
     vertex_count = len(graph)
     distances = [INFINITY] * vertex_count
     previous = [None] * vertex_count
     visited = [False] * vertex_count
+    trace = []
     distances[start] = 0
 
     for _ in range(vertex_count):
@@ -67,6 +78,7 @@ def dijkstra(graph, start):
             break
 
         visited[current] = True
+        updates = []
 
         # Relax every outgoing edge manually.
         for neighbour in range(vertex_count):
@@ -78,9 +90,23 @@ def dijkstra(graph, start):
             candidate_distance = distances[current] + weight
 
             if candidate_distance < distances[neighbour]:
+                old_distance = distances[neighbour]
                 distances[neighbour] = candidate_distance
                 previous[neighbour] = current
+                updates.append(
+                    (neighbour, old_distance, candidate_distance)
+                )
 
+        trace.append(
+            DijkstraStep(
+                selected=current,
+                distance=distances[current],
+                updates=tuple(updates),
+            )
+        )
+
+    if include_trace:
+        return distances, previous, trace
     return distances, previous
 
 
@@ -263,7 +289,9 @@ def custom_data():
                 print("A route must connect two different locations.")
                 continue
 
-            edge_key = tuple(sorted((first, second)))
+            edge_key = (
+                (first, second) if first < second else (second, first)
+            )
 
             if edge_key in added_edges:
                 print("That route already exists. Choose another pair.")
@@ -336,6 +364,40 @@ def display_all_results(names, distances, previous, start):
     print("=" * 78)
 
 
+def display_greedy_trace(names, trace):
+    """Display each greedy selection and its successful relaxations."""
+    print("\n" + "=" * 78)
+    print("GREEDY SELECTION TRACE")
+    print("=" * 78)
+    print(f"{'Stage':<8}{'Selected location':<28}{'Final distance':<18}")
+    print("-" * 78)
+
+    for stage, step in enumerate(trace, start=1):
+        print(
+            f"{stage:<8}{names[step.selected]:<28}"
+            f"{format_distance(step.distance):<18}"
+        )
+
+        if not step.updates:
+            print(f"{'':<8}Improved neighbours: None")
+            continue
+
+        print(f"{'':<8}Improved neighbours:")
+        for neighbour, old_distance, new_distance in step.updates:
+            print(
+                f"{'':<10}- {names[neighbour]}: "
+                f"{format_distance(old_distance)} -> "
+                f"{format_distance(new_distance)}"
+            )
+
+    print("-" * 78)
+    print(
+        "Greedy rule: choose the nearest unvisited location, then relax "
+        "its outgoing routes."
+    )
+    print("=" * 78)
+
+
 def main():
     """Run the console application."""
     while True:
@@ -359,18 +421,24 @@ def main():
             start = select_location(
                 names,
                 f"Choose the starting location [{default_start + 1}]: ",
+                default=default_start,
             )
         else:
             names, graph, start = custom_data()
 
-        while True:
-            distances, previous = dijkstra(graph, start)
+        distances, previous, trace = dijkstra(
+            graph,
+            start,
+            include_trace=True,
+        )
 
+        while True:
             print("\nRESULT DISPLAY OPTIONS")
             print("1. Show route to one destination")
             print("2. Show routes to every destination")
+            print("3. Show the greedy selection trace")
 
-            display_choice = read_integer("Choose an option: ", 1, 2)
+            display_choice = read_integer("Choose an option: ", 1, 3)
 
             if display_choice == 1:
                 display_locations(names)
@@ -385,13 +453,15 @@ def main():
                     start,
                     destination,
                 )
-            else:
+            elif display_choice == 2:
                 display_all_results(
                     names,
                     distances,
                     previous,
                     start,
                 )
+            else:
+                display_greedy_trace(names, trace)
 
             print("\n" + "=" * 41)
             print("1. Find another destination")
@@ -409,6 +479,11 @@ def main():
                 start = select_location(
                     names,
                     "Choose the new starting location: ",
+                )
+                distances, previous, trace = dijkstra(
+                    graph,
+                    start,
+                    include_trace=True,
                 )
                 continue
 
