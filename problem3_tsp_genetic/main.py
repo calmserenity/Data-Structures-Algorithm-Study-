@@ -1,7 +1,7 @@
-"""Console program for TSP using a genetic algorithm.
+"""Package-delivery route optimizer using a genetic algorithm.
 
 Only Python's standard random-number and mathematics utilities are used.
-The GA operations themselves are implemented explicitly below.
+The GA operations and route evaluation are implemented explicitly below.
 """
 
 import math
@@ -16,7 +16,9 @@ DEFAULT_SEED = 2103
 
 
 @dataclass(frozen=True)
-class City:
+class DeliveryPoint:
+    """A depot or package-delivery stop on a two-dimensional map."""
+
     name: str
     x: float
     y: float
@@ -34,26 +36,26 @@ def distance(first, second):
     return math.sqrt((first.x - second.x) ** 2 + (first.y - second.y) ** 2)
 
 
-def route_distance(route, cities):
+def route_distance(route, delivery_points):
     total = 0.0
     for index in range(len(route)):
-        current = cities[route[index]]
-        following = cities[route[(index + 1) % len(route)]]
+        current = delivery_points[route[index]]
+        following = delivery_points[route[(index + 1) % len(route)]]
         total += distance(current, following)
     return total
 
 
-def build_distance_matrix(cities):
-    """Precompute every symmetric city-to-city distance once."""
-    city_count = len(cities)
+def build_distance_matrix(delivery_points):
+    """Precompute every symmetric point-to-point distance once."""
+    point_count = len(delivery_points)
     matrix = [
-        [0.0 for _ in range(city_count)]
-        for _ in range(city_count)
+        [0.0 for _ in range(point_count)]
+        for _ in range(point_count)
     ]
 
-    for first in range(city_count):
-        for second in range(first + 1, city_count):
-            value = distance(cities[first], cities[second])
+    for first in range(point_count):
+        for second in range(first + 1, point_count):
+            value = distance(delivery_points[first], delivery_points[second])
             matrix[first][second] = value
             matrix[second][first] = value
 
@@ -70,10 +72,10 @@ def route_distance_from_matrix(route, distance_matrix):
     return total
 
 
-def random_route(city_count, rng):
+def random_route(point_count, rng):
     """Create a random permutation using manual Fisher-Yates shuffling."""
-    route = list(range(city_count))
-    for index in range(city_count - 1, 0, -1):
+    route = list(range(point_count))
+    for index in range(point_count - 1, 0, -1):
         swap_index = rng.randrange(index + 1)
         route[index], route[swap_index] = route[swap_index], route[index]
     return route
@@ -138,33 +140,33 @@ def best_route(population):
     return best.route[:], best.distance
 
 
-def normalize_route(route, start_city=0):
-    """Rotate a cyclic route so that ``start_city`` is shown first."""
-    for position, city_index in enumerate(route):
-        if city_index == start_city:
+def normalize_route(route, depot_index=0):
+    """Rotate a cyclic route so that the depot is shown first."""
+    for position, point_index in enumerate(route):
+        if point_index == depot_index:
             return route[position:] + route[:position]
-    raise ValueError("The requested starting city is not present in the route.")
+    raise ValueError("The requested depot is not present in the route.")
 
 
 def genetic_algorithm(
-    cities,
+    delivery_points,
     population_size=DEFAULT_POPULATION_SIZE,
     generations=DEFAULT_GENERATIONS,
     mutation_rate=DEFAULT_MUTATION_RATE,
     seed=DEFAULT_SEED,
 ):
-    """Find a short TSP tour using a manually implemented genetic algorithm."""
-    if len(cities) < 3:
-        raise ValueError("At least three cities are required.")
-    for city in cities:
-        if not isinstance(city, City):
-            raise ValueError("Every city must be a City instance.")
+    """Find a short depot-to-deliveries round trip using a genetic algorithm."""
+    if len(delivery_points) < 3:
+        raise ValueError("A depot and at least two delivery stops are required.")
+    for point in delivery_points:
+        if not isinstance(point, DeliveryPoint):
+            raise ValueError("Every location must be a DeliveryPoint instance.")
         try:
-            coordinates_are_finite = math.isfinite(city.x) and math.isfinite(city.y)
+            coordinates_are_finite = math.isfinite(point.x) and math.isfinite(point.y)
         except TypeError as error:
-            raise ValueError("City coordinates must be finite numbers.") from error
+            raise ValueError("Location coordinates must be finite numbers.") from error
         if not coordinates_are_finite:
-            raise ValueError("City coordinates must be finite numbers.")
+            raise ValueError("Location coordinates must be finite numbers.")
 
     if type(population_size) is not int or population_size < 2:
         raise ValueError("Population size must be an integer of at least 2.")
@@ -181,10 +183,10 @@ def genetic_algorithm(
         raise ValueError("Random seed must be an integer.")
 
     rng = random.Random(seed)
-    distance_matrix = build_distance_matrix(cities)
+    distance_matrix = build_distance_matrix(delivery_points)
     population = []
     for _ in range(population_size):
-        route = random_route(len(cities), rng)
+        route = random_route(len(delivery_points), rng)
         population.append(
             EvaluatedRoute(
                 route=route,
@@ -218,11 +220,11 @@ def genetic_algorithm(
 
 def sample_data():
     return [
-        City("Subang Jaya", 0, 0),
-        City("Kuala Lumpur", 0, 4),
-        City("Shah Alam", 3, 4),
-        City("Ipoh", 3, 0),
-        City("Rawang", 1.5, 2),
+        DeliveryPoint("Distribution Depot", 0, 0),
+        DeliveryPoint("Package A - Office Tower", 0, 4),
+        DeliveryPoint("Package B - Apartment", 3, 4),
+        DeliveryPoint("Package C - Retail Store", 3, 0),
+        DeliveryPoint("Package D - Service Centre", 1.5, 2),
     ]
 
 
@@ -276,15 +278,22 @@ def read_float(prompt, minimum=None, maximum=None):
 
 
 def custom_data():
-    count = read_integer("Number of cities: ", 3)
-    cities = []
-    for index in range(count):
-        print(f"City {index + 1}")
-        name = input("  Name: ").strip() or f"City {index + 1}"
+    print("\nDEPOT")
+    depot_name = input("  Name: ").strip() or "Distribution Depot"
+    depot_x = read_float("  X coordinate: ")
+    depot_y = read_float("  Y coordinate: ")
+    delivery_points = [DeliveryPoint(depot_name, depot_x, depot_y)]
+
+    stop_count = read_integer("Number of delivery stops (at least 2): ", 2)
+    for index in range(stop_count):
+        print(f"Delivery stop {index + 1}")
+        name = input("  Package/destination: ").strip()
+        if not name:
+            name = f"Package {index + 1}"
         x = read_float("  X coordinate: ")
         y = read_float("  Y coordinate: ")
-        cities.append(City(name, x, y))
-    return cities
+        delivery_points.append(DeliveryPoint(name, x, y))
+    return delivery_points
 
 
 def read_genetic_settings():
@@ -308,28 +317,29 @@ def read_genetic_settings():
     return population_size, generations, mutation_rate, seed
 
 
-def display_cities(cities):
-    """Display the input cities and their coordinates."""
-    print("\nINPUT CITIES")
+def display_delivery_points(delivery_points):
+    """Display the depot, delivery stops, and their coordinates."""
+    print("\nDELIVERY POINTS")
     print("-" * 58)
-    print(f"{'No.':<6}{'City':<24}{'X':>14}{'Y':>14}")
+    print(f"{'Type':<10}{'Location':<22}{'X':>13}{'Y':>13}")
     print("-" * 58)
-    for number, city in enumerate(cities, start=1):
-        print(f"{number:<6}{city.name:<24}{city.x:>14g}{city.y:>14g}")
+    for index, point in enumerate(delivery_points):
+        point_type = "Depot" if index == 0 else f"Stop {index}"
+        print(f"{point_type:<10}{point.name:<22}{point.x:>13g}{point.y:>13g}")
     print("-" * 58)
 
 
 def display_results(
     route,
     total_distance,
-    cities,
+    delivery_points,
     population_size,
     generations,
     mutation_rate,
     seed,
 ):
-    """Display the closed route, distance, settings, and heuristic caveat."""
-    names = [cities[index].name for index in route]
+    """Display the delivery route, distance, settings, and heuristic caveat."""
+    names = [delivery_points[index].name for index in route]
     names.append(names[0])
     mutation_rate_text = format(mutation_rate, ".15g")
     if "e" not in mutation_rate_text.lower():
@@ -339,10 +349,11 @@ def display_results(
             decimal_places = len(mutation_rate_text.split(".", 1)[1])
             mutation_rate_text += "0" * max(0, 2 - decimal_places)
 
-    print("\nGENETIC-ALGORITHM RESULTS")
+    print("\nPACKAGE-DELIVERY ROUTE")
     print("-" * 58)
-    print("Best route found:", " -> ".join(names))
+    print("Optimized route:", " -> ".join(names))
     print(f"Total distance: {total_distance:.2f}")
+    print(f"Packages delivered: {len(delivery_points) - 1}")
     print(f"Population size: {population_size}")
     print(f"Generations: {generations}")
     print(f"Mutation rate: {mutation_rate_text}")
@@ -354,14 +365,14 @@ def display_results(
 
 
 def main():
-    print("TSP USING A GENETIC ALGORITHM")
-    use_sample = read_yes_no("Use sample data? (Y/n): ", default=True)
-    cities = sample_data() if use_sample else custom_data()
-    display_cities(cities)
+    print("PACKAGE DELIVERY OPTIMIZER USING A GENETIC ALGORITHM")
+    use_sample = read_yes_no("Use sample delivery data? (Y/n): ", default=True)
+    delivery_points = sample_data() if use_sample else custom_data()
+    display_delivery_points(delivery_points)
 
     population_size, generations, mutation_rate, seed = read_genetic_settings()
     best, total = genetic_algorithm(
-        cities,
+        delivery_points,
         population_size,
         generations,
         mutation_rate,
@@ -370,7 +381,7 @@ def main():
     display_results(
         best,
         total,
-        cities,
+        delivery_points,
         population_size,
         generations,
         mutation_rate,

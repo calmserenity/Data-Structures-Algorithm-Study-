@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from problem3_tsp_genetic import main as tsp_program
 from problem3_tsp_genetic.main import (
-    City,
+    DeliveryPoint,
     EvaluatedRoute,
     best_route,
     build_distance_matrix,
@@ -34,26 +34,37 @@ class GeneticAlgorithmTests(unittest.TestCase):
         self.assertEqual(total, 8.5)
 
     def test_route_closes_the_square(self):
-        cities = [
-            City("A", 0, 0),
-            City("B", 0, 1),
-            City("C", 1, 1),
-            City("D", 1, 0),
+        delivery_points = [
+            DeliveryPoint("Depot", 0, 0),
+            DeliveryPoint("Package A", 0, 1),
+            DeliveryPoint("Package B", 1, 1),
+            DeliveryPoint("Package C", 1, 0),
         ]
-        route, total = genetic_algorithm(cities, 30, 60, 0.1, seed=10)
+        route, total = genetic_algorithm(delivery_points, 30, 60, 0.1, seed=10)
         self.assertEqual(set(route), {0, 1, 2, 3})
         self.assertAlmostEqual(total, 4.0, places=6)
 
     def test_route_distance_includes_return_edge(self):
-        cities = [City("A", 0, 0), City("B", 3, 0), City("C", 3, 4)]
-        self.assertAlmostEqual(route_distance([0, 1, 2], cities), 12.0)
+        delivery_points = [
+            DeliveryPoint("Depot", 0, 0),
+            DeliveryPoint("Package A", 3, 0),
+            DeliveryPoint("Package B", 3, 4),
+        ]
+        self.assertAlmostEqual(
+            route_distance([0, 1, 2], delivery_points),
+            12.0,
+        )
 
     def test_distance_matrix_is_symmetric_with_zero_diagonal(self):
-        cities = [City("A", 0, 0), City("B", 3, 0), City("C", 3, 4)]
-        matrix = build_distance_matrix(cities)
+        delivery_points = [
+            DeliveryPoint("Depot", 0, 0),
+            DeliveryPoint("Package A", 3, 0),
+            DeliveryPoint("Package B", 3, 4),
+        ]
+        matrix = build_distance_matrix(delivery_points)
 
-        for city in range(len(cities)):
-            self.assertEqual(matrix[city][city], 0.0)
+        for point in range(len(delivery_points)):
+            self.assertEqual(matrix[point][point], 0.0)
 
         self.assertEqual(matrix[0][1], matrix[1][0])
         self.assertEqual(matrix[1][2], matrix[2][1])
@@ -61,18 +72,18 @@ class GeneticAlgorithmTests(unittest.TestCase):
         self.assertAlmostEqual(matrix[1][2], 4.0)
 
     def test_matrix_route_distance_matches_direct_calculation(self):
-        cities = [
-            City("A", 0, 0),
-            City("B", 0, 2),
-            City("C", 3, 2),
-            City("D", 3, 0),
+        delivery_points = [
+            DeliveryPoint("Depot", 0, 0),
+            DeliveryPoint("Package A", 0, 2),
+            DeliveryPoint("Package B", 3, 2),
+            DeliveryPoint("Package C", 3, 0),
         ]
         route = [0, 2, 1, 3]
-        matrix = build_distance_matrix(cities)
+        matrix = build_distance_matrix(delivery_points)
 
         self.assertAlmostEqual(
             route_distance_from_matrix(route, matrix),
-            route_distance(route, cities),
+            route_distance(route, delivery_points),
         )
 
     def test_genetic_algorithm_evaluates_each_new_route_once(self):
@@ -98,8 +109,18 @@ class GeneticAlgorithmTests(unittest.TestCase):
         self.assertEqual(evaluator.call_count, expected_evaluations)
 
     def test_triangle_has_known_total_distance(self):
-        cities = [City("A", 0, 0), City("B", 3, 0), City("C", 0, 4)]
-        route, total = genetic_algorithm(cities, 12, 20, 0.1, seed=5)
+        delivery_points = [
+            DeliveryPoint("Depot", 0, 0),
+            DeliveryPoint("Package A", 3, 0),
+            DeliveryPoint("Package B", 0, 4),
+        ]
+        route, total = genetic_algorithm(
+            delivery_points,
+            12,
+            20,
+            0.1,
+            seed=5,
+        )
         self.assertEqual(set(route), {0, 1, 2})
         self.assertAlmostEqual(total, 12.0)
 
@@ -119,22 +140,27 @@ class GeneticAlgorithmTests(unittest.TestCase):
         self.assertEqual(route, [0, 1, 2, 3, 4])
 
     def test_same_seed_is_reproducible(self):
-        cities = sample_data()
-        first_route, first_distance = genetic_algorithm(cities, seed=27)
-        second_route, second_distance = genetic_algorithm(cities, seed=27)
+        delivery_points = sample_data()
+        first_route, first_distance = genetic_algorithm(delivery_points, seed=27)
+        second_route, second_distance = genetic_algorithm(delivery_points, seed=27)
         self.assertEqual(first_route, second_route)
         self.assertEqual(first_distance, second_distance)
 
-    def test_returned_route_starts_with_first_city(self):
+    def test_returned_route_starts_at_depot(self):
         route, _ = genetic_algorithm(sample_data(), seed=37)
         self.assertEqual(route[0], 0)
 
-    def test_too_few_cities_is_rejected(self):
+    def test_too_few_delivery_points_is_rejected(self):
         with self.assertRaises(ValueError):
-            genetic_algorithm([City("A", 0, 0), City("B", 1, 1)])
+            genetic_algorithm(
+                [
+                    DeliveryPoint("Depot", 0, 0),
+                    DeliveryPoint("Package A", 1, 1),
+                ]
+            )
 
     def test_invalid_genetic_settings_are_rejected(self):
-        cities = sample_data()
+        delivery_points = sample_data()
         invalid_settings = [
             {"population_size": 1},
             {"population_size": 2.5},
@@ -148,18 +174,18 @@ class GeneticAlgorithmTests(unittest.TestCase):
         for settings in invalid_settings:
             with self.subTest(settings=settings):
                 with self.assertRaises(ValueError):
-                    genetic_algorithm(cities, **settings)
+                    genetic_algorithm(delivery_points, **settings)
 
     def test_non_finite_coordinates_are_rejected(self):
         for coordinate in (float("nan"), float("inf"), float("-inf")):
-            cities = [
-                City("A", coordinate, 0),
-                City("B", 1, 0),
-                City("C", 0, 1),
+            delivery_points = [
+                DeliveryPoint("Depot", coordinate, 0),
+                DeliveryPoint("Package A", 1, 0),
+                DeliveryPoint("Package B", 0, 1),
             ]
             with self.subTest(coordinate=coordinate):
                 with self.assertRaises(ValueError):
-                    genetic_algorithm(cities)
+                    genetic_algorithm(delivery_points)
 
     def test_float_reader_reprompts_after_non_finite_input(self):
         output = io.StringIO()
@@ -176,14 +202,44 @@ class GeneticAlgorithmTests(unittest.TestCase):
                 tsp_program.main()
 
         text = output.getvalue()
-        self.assertIn("INPUT CITIES", text)
-        self.assertIn("Best route found:", text)
+        self.assertIn("DELIVERY POINTS", text)
+        self.assertIn("Optimized route:", text)
+        self.assertIn("Distribution Depot", text)
+        self.assertIn("Packages delivered: 4", text)
         self.assertIn("Total distance: 15.00", text)
         self.assertIn("Population size: 60", text)
         self.assertIn("Generations: 150", text)
         self.assertIn("Mutation rate: 0.10", text)
         self.assertIn("Random seed: 2103", text)
         self.assertIn("not guaranteed to be globally optimal", text)
+
+    def test_custom_console_run_accepts_depot_and_delivery_stops(self):
+        output = io.StringIO()
+        answers = [
+            "n",
+            "Central Depot",
+            "0",
+            "0",
+            "2",
+            "Order 101",
+            "3",
+            "0",
+            "Order 202",
+            "0",
+            "4",
+            "",
+        ]
+
+        with patch("builtins.input", side_effect=answers), redirect_stdout(output):
+            tsp_program.main()
+
+        text = output.getvalue()
+        self.assertIn("Central Depot", text)
+        self.assertIn("Order 101", text)
+        self.assertIn("Order 202", text)
+        self.assertIn("Optimized route:", text)
+        self.assertIn("Packages delivered: 2", text)
+        self.assertIn("Total distance: 12.00", text)
 
     def test_custom_genetic_settings_are_used_and_displayed(self):
         output = io.StringIO()
