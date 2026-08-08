@@ -20,6 +20,27 @@ The core algorithms use only code written in this repository. Standard-library
 utilities are used for data classes, console input, mathematics, random-number
 generation, and automated testing.
 
+## Run Problem 1: Dijkstra's Shortest Path
+
+From the repository root:
+
+```bash
+python3 problem1_dijkstra/main.py
+```
+
+Choose the built-in Kuala Lumpur landmark network or create a custom undirected
+network of 2 to 20 locations. The results menu can display one shortest route,
+all shortest routes from the selected start, or a greedy selection trace showing
+which location was finalized at each stage and which neighbour distances
+improved. The built-in distances are illustrative demonstration data.
+
+The reproducible sample route from KL Sentral to KLCC is:
+
+```text
+KL Sentral -> Pasar Seni -> Masjid Jamek -> KLCC
+Total distance: 6.30 km
+```
+
 ## Run Problem 2: 0/1 Knapsack
 
 From the repository root:
@@ -71,9 +92,10 @@ efficiently but does not guarantee the global optimum for every input.
 
 ## Run Tests
 
-Run the tests for the two implemented assignment sections:
+Run an individual problem suite:
 
 ```bash
+python3 -m unittest -v problem1_dijkstra.test_dijkstra
 python3 -m unittest -v problem2_knapsack_dp.test_knapsack problem3_tsp_genetic.test_genetic
 ```
 
@@ -92,7 +114,7 @@ python3 -m unittest -v problem1_dijkstra.test_dijkstra problem2_knapsack_dp.test
   report.
 - Include expected-versus-actual results and explain how correctness was
   checked.
-- Ensure every member understands the recurrence used by 0/1 Knapsack and the
-  genetic operators used by TSP.
+- Ensure every member understands Dijkstra's greedy choice and relaxation, the
+  recurrence used by 0/1 Knapsack, and the genetic operators used by TSP.
 - Declare the parts assisted by generative AI and explain how the group manually
   reviewed and verified them.
