@@ -21,6 +21,26 @@ from problem3_tsp_genetic.main import (
 
 
 class GeneticAlgorithmTests(unittest.TestCase):
+    def assert_valid_closed_route(self, route, total, delivery_points):
+        """Check the route representation and both distance implementations."""
+        expected_indices = set(range(len(delivery_points)))
+        self.assertEqual(len(route), len(delivery_points))
+        self.assertEqual(route[0], 0)
+        self.assertEqual(set(route), expected_indices)
+        self.assertAlmostEqual(
+            total,
+            route_distance(route, delivery_points),
+            places=6,
+        )
+        self.assertAlmostEqual(
+            total,
+            route_distance_from_matrix(
+                route,
+                build_distance_matrix(delivery_points),
+            ),
+            places=6,
+        )
+
     def test_best_route_keeps_route_and_cached_distance_together(self):
         population = [
             EvaluatedRoute([0, 1, 2], 12.0),
@@ -41,7 +61,7 @@ class GeneticAlgorithmTests(unittest.TestCase):
             DeliveryPoint("Package C", 1, 0),
         ]
         route, total = genetic_algorithm(delivery_points, 30, 60, 0.1, seed=10)
-        self.assertEqual(set(route), {0, 1, 2, 3})
+        self.assert_valid_closed_route(route, total, delivery_points)
         self.assertAlmostEqual(total, 4.0, places=6)
 
     def test_route_distance_includes_return_edge(self):
@@ -121,7 +141,7 @@ class GeneticAlgorithmTests(unittest.TestCase):
             0.1,
             seed=5,
         )
-        self.assertEqual(set(route), {0, 1, 2})
+        self.assert_valid_closed_route(route, total, delivery_points)
         self.assertAlmostEqual(total, 12.0)
 
     def test_ordered_crossover_produces_valid_permutation(self):
@@ -147,8 +167,9 @@ class GeneticAlgorithmTests(unittest.TestCase):
         self.assertEqual(first_distance, second_distance)
 
     def test_returned_route_starts_at_depot(self):
-        route, _ = genetic_algorithm(sample_data(), seed=37)
-        self.assertEqual(route[0], 0)
+        delivery_points = sample_data()
+        route, total = genetic_algorithm(delivery_points, seed=37)
+        self.assert_valid_closed_route(route, total, delivery_points)
 
     def test_too_few_delivery_points_is_rejected(self):
         with self.assertRaises(ValueError):
@@ -213,6 +234,20 @@ class GeneticAlgorithmTests(unittest.TestCase):
         self.assertIn("Random seed: 2103", text)
         self.assertIn("not guaranteed to be globally optimal", text)
 
+        route_line = next(
+            line for line in text.splitlines()
+            if line.startswith("Optimized route: ")
+        )
+        route_names = [
+            name.strip()
+            for name in route_line.removeprefix("Optimized route: ").split(" -> ")
+        ]
+        expected_names = [point.name for point in sample_data()]
+        self.assertEqual(route_names[0], expected_names[0])
+        self.assertEqual(route_names[-1], expected_names[0])
+        self.assertEqual(len(route_names), len(expected_names) + 1)
+        self.assertEqual(set(route_names[:-1]), set(expected_names))
+
     def test_custom_console_run_accepts_depot_and_delivery_stops(self):
         output = io.StringIO()
         answers = [
@@ -241,10 +276,28 @@ class GeneticAlgorithmTests(unittest.TestCase):
         self.assertIn("Packages delivered: 2", text)
         self.assertIn("Total distance: 12.00", text)
 
+        route_line = next(
+            line for line in text.splitlines()
+            if line.startswith("Optimized route: ")
+        )
+        route_names = [
+            name.strip()
+            for name in route_line.removeprefix("Optimized route: ").split(" -> ")
+        ]
+        expected_names = ["Central Depot", "Order 101", "Order 202"]
+        self.assertEqual(route_names[0], expected_names[0])
+        self.assertEqual(route_names[-1], expected_names[0])
+        self.assertEqual(len(route_names), len(expected_names) + 1)
+        self.assertEqual(set(route_names[:-1]), set(expected_names))
+
     def test_custom_genetic_settings_are_used_and_displayed(self):
         output = io.StringIO()
         answers = ["", "n", "12", "20", "0.001", "99"]
-        with patch("builtins.input", side_effect=answers):
+        with patch("builtins.input", side_effect=answers), patch.object(
+            tsp_program,
+            "genetic_algorithm",
+            wraps=tsp_program.genetic_algorithm,
+        ) as optimizer:
             with redirect_stdout(output):
                 tsp_program.main()
 
@@ -253,6 +306,13 @@ class GeneticAlgorithmTests(unittest.TestCase):
         self.assertIn("Generations: 20", text)
         self.assertIn("Mutation rate: 0.001", text)
         self.assertIn("Random seed: 99", text)
+        optimizer.assert_called_once_with(
+            tsp_program.sample_data(),
+            12,
+            20,
+            0.001,
+            99,
+        )
 
 
 if __name__ == "__main__":
